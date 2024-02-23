@@ -18,17 +18,19 @@ class Controller {
         // clear screen at frame rate so we always start fresh
         display.clear();
 
-        display.setShadowZones();
-
         // show all players in the right place, by adding them to display buffer
         for (const player of this.game.players) {
           display.setPixel(player.position, player.playerColor);
         }
 
-        // check if a player has won
-        for (const player of this.game.players) {
-          if (player.hasKnife && player.hasToken) {
-            this.gameState = "SCORE";
+        // check if player has picked up the ball
+        if (this.game.ball.dropped) {
+          for (const player of this.game.players) {
+            if (player.position === this.game.ball.droppedPosition) {
+              player.receiveItem();
+              this.game.ball.dropped = false;
+              print("player picked up ball!");
+            }
           }
         }
 
@@ -56,9 +58,8 @@ class Controller {
 function keyPressed() {
   // A D to move left and right
   // S to give
-  // W to act
   if (key == "A" || key == "a") {
-    game.move(playerOne, -1);
+    game.move(playerOne, 0);
   }
 
   if (key == "D" || key == "d") {
@@ -69,15 +70,11 @@ function keyPressed() {
     game.giveItem(playerOne);
   }
 
-  if (key == "W" || key == "w") {
-    game.playAction(playerOne);
-  }
-
   // J L to move left and right
   // K to give
   // U to act
   if (key == "J" || key == "j") {
-    game.move(playerTwo, -1);
+    game.move(playerTwo, 0);
   }
 
   if (key == "L" || key == "l") {
@@ -88,15 +85,11 @@ function keyPressed() {
     game.giveItem(playerTwo);
   }
 
-  if (key == "U" || key == "u") {
-    game.playAction(playerTwo);
-  }
-
   // F H to move left and right
   // G to give
   // T to act
   if (key == "F" || key == "f") {
-    game.move(playerThree, -1);
+    game.move(playerThree, 0);
   }
 
   if (key == "H" || key == "h") {
@@ -107,8 +100,19 @@ function keyPressed() {
     game.giveItem(playerThree);
   }
 
-  if (key == "T" || key == "t") {
-    game.playAction(playerThree);
+  // F H to move left and right
+  // G to give
+  // T to act
+  if (key == "Z" || key == "z") {
+    game.move(playerFour, 0);
+  }
+
+  if (key == "C" || key == "c") {
+    game.move(playerFour, 1);
+  }
+
+  if (key == "X" || key == "x") {
+    game.giveItem(playerFour);
   }
 
   // When you press the letter R, the game resets back to the play state
