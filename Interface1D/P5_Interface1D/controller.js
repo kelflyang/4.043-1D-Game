@@ -1,5 +1,6 @@
 // This is where your state machines and game logic lives
-
+// let TIME_LIMIT = 30000;
+let TIME_LIMIT = 3000;
 class Controller {
   // This is the state we start with.
   constructor(_game) {
@@ -13,19 +14,35 @@ class Controller {
     // This is where your game logic lives
     /////////////////////////////////////////////////////////////////
     switch (this.gameState) {
+      case "RESTART":
+        display.off = false;
+        // display.setPlayers(players);
+
+        playwerWithItem = players[Math.floor(Math.random() * 1)];
+        playwerWithItem.receiveItem();
+
+        timer = new Timer();
+        timer.start();
+
+        this.game.timer = timer;
+        this.gameState = "START";
+
       // This is the main game state, where the playing actually happens
       case "PLAY":
+        this.game.timer.update();
+
         // clear screen at frame rate so we always start fresh
         display.clear();
 
         // show all players in the right place, by adding them to display buffer
-        for (const player of this.game.players) {
+        for (const player of players) {
+          // print("player position", player);
           display.setPixel(player.position, player.playerColor);
         }
 
         // check if player has picked up the ball
         if (this.game.ball.dropped) {
-          for (const player of this.game.players) {
+          for (const player of players) {
             if (player.position === this.game.ball.droppedPosition) {
               player.receiveItem();
               this.game.ball.dropped = false;
@@ -34,16 +51,30 @@ class Controller {
           }
         }
 
+        if (this.game.timer.getElapsedTime() > TIME_LIMIT) {
+          this.gameState = "SCORE";
+        }
+
         break;
 
       // Game is over. Show winner and clean everything up so we can start a new game.
       case "SCORE":
-        // reset
+        this.game.timer.stop();
+        this.game.timer.reset();
 
-        // reset shadow zones
+        display.off = true;
 
-        //light up w/ winner color by populating all pixels in buffer with their color
-        display.setAllPixels(200, 34, 79);
+        // find who is the last one with the ball:
+        if (this.game.ball.dropped) {
+          // nobody wins
+        } else {
+          for (const player of players) {
+            if (player.hasItem) {
+              display.setAllPixels(player.playerColor);
+              player.hasItem = false;
+            }
+          }
+        }
 
         break;
 
@@ -67,7 +98,7 @@ function keyPressed() {
   }
 
   if (key == "S" || key == "s") {
-    game.giveItem(playerOne);
+    game.action(playerOne);
   }
 
   // J L to move left and right
@@ -82,7 +113,7 @@ function keyPressed() {
   }
 
   if (key == "K" || key == "k") {
-    game.giveItem(playerTwo);
+    game.action(playerTwo);
   }
 
   // F H to move left and right
@@ -97,7 +128,7 @@ function keyPressed() {
   }
 
   if (key == "G" || key == "g") {
-    game.giveItem(playerThree);
+    game.action(playerThree);
   }
 
   // F H to move left and right
@@ -112,11 +143,11 @@ function keyPressed() {
   }
 
   if (key == "X" || key == "x") {
-    game.giveItem(playerFour);
+    game.action(playerFour);
   }
 
   // When you press the letter R, the game resets back to the play state
   if (key == "R" || key == "r") {
-    controller.gameState = "PLAY";
+    controller.gameState = "RESTART";
   }
 }

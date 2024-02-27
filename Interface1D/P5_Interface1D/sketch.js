@@ -101,7 +101,10 @@ function setup() {
   playwerWithItem = players[Math.floor(Math.random() * 1)];
   playwerWithItem.receiveItem();
 
-  game = new Game(players, displaySize, ball);
+  timer = new Timer();
+  timer.start();
+
+  game = new Game(players, displaySize, ball, timer);
   controller = new Controller(game); // Initializing controller
 }
 

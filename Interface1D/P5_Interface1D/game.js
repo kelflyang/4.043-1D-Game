@@ -1,11 +1,11 @@
 // game state keeps track of
 
 class Game {
-  constructor(_players, _displaySize, _ball) {
+  constructor(_players, _displaySize, _ball, _timer) {
     this.displaySize = _displaySize;
-    this.players = _players;
     this.range = 3;
     this.ball = _ball;
+    this.timer = _timer;
   }
 
   // Move player based on keyboard input
@@ -66,22 +66,22 @@ class Game {
     return value >= min && value <= max;
   }
 
-  findNearbyPlayer(current) {
+  findNearbyPlayer(current, _range, _sameDirection) {
     let nearbyPlayers = [];
-    for (const player of this.players) {
+    for (const player of players) {
       if (
         player.id !== current.id &&
-        player.direction !== current.direction &&
+        (player.direction !== current.direction || !_sameDirection) &&
         ((current.direction === 1 &&
           this.isInRange(
             player.position,
             current.position,
-            current.position + this.range
+            current.position + _range
           )) ||
           (current.direction === 0 &&
             this.isInRange(
               player.position,
-              current.position - this.range,
+              current.position - _range,
               current.position
             )))
       ) {
@@ -120,9 +120,18 @@ class Game {
     return newPosition;
   }
 
+  action(player) {
+    if (player.hasItem) {
+      this.giveItem(player);
+    } else {
+      // try tackling
+      this.tackle(player);
+    }
+  }
+
   giveItem(giver) {
     if (giver.hasItem) {
-      let player = this.findNearbyPlayer(giver);
+      let player = this.findNearbyPlayer(giver, this.range);
       if (player) {
         giver.removeItem();
         player.receiveItem();
@@ -130,14 +139,24 @@ class Game {
         // drop the ball
         giver.removeItem();
         if (giver.direction === 0) {
-          this.ball.dropBall(this.getThrownPosition(giver.position, 0));
+          this.ball.dropBall(this.getThrownPosition(giver.position, 0, true));
         } else {
-          this.ball.dropBall(this.getThrownPosition(giver.position, 1));
+          this.ball.dropBall(this.getThrownPosition(giver.position, 1, true));
         }
       }
     } else {
       console.log(`${giver.id} does not have an item`);
     }
-    print("PLAYERS ", this.players);
+  }
+
+  tackle(tackler) {
+    console.log("TACKLE");
+    let player = this.findNearbyPlayer(tackler, 0, false);
+    if (player) {
+      if (player.hasItem) {
+        player.removeItem();
+        tackler.receiveItem();
+      }
+    }
   }
 }
