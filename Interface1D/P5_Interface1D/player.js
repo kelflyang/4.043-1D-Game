@@ -9,6 +9,7 @@ class Player {
     this.hasBall = false;
     this.blocksLeft = 2;
     this.direction;
+    this.tackled = 0;
   }
 
   show() {

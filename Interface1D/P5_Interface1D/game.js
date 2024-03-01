@@ -1,5 +1,5 @@
 // game state keeps track of
-
+let PUSH_RANGE = 5;
 class Game {
   constructor() {}
 
@@ -35,6 +35,22 @@ class Game {
     ball.isDropped = false;
   }
 
+  dropBall(player, newPos) {
+    player.hasBall = false;
+    ball.isDropped = true;
+
+    if (newPos) {
+      ball.position = newPos;
+      return;
+    }
+
+    if (player.direction > 0) {
+      ball.position = player.position + 1;
+    } else {
+      ball.position = player.position - 1;
+    }
+  }
+
   movePlayer(player, direction) {
     let newPosition;
     player.direction = direction;
@@ -59,10 +75,42 @@ class Game {
   }
 
   tackle(player) {
+    // TRY TACKLING OBSTACLES
     for (const obstacle of obstacles) {
-      if (this.isInteracting(player.position, obstacle.position)) {
-        console.log("decreasing durability");
+      if (
+        this.isInteracting(player.position, obstacle.position) &&
+        obstacle.player !== player
+      ) {
         obstacle.durability -= 1;
+        return;
+      }
+    }
+
+    // TRY TACKLING OTHER PLAYER
+    console.log("try tackling other player");
+    let otherPlayer = players.filter((p) => p !== player)[0];
+    if (this.isInteracting(player.position, otherPlayer.position)) {
+      console.log("Tackling other player!");
+      otherPlayer.tackled += 1;
+      let pushDirection = otherPlayer.position > player.position ? 1 : -1;
+      console.log("push direction ", pushDirection);
+      if (otherPlayer.tackled === 1) {
+        // push _player back
+        game.movePlayer(otherPlayer, pushDirection * PUSH_RANGE);
+      } else {
+        game.movePlayer(otherPlayer, pushDirection * PUSH_RANGE);
+        if (otherPlayer.hasBall) {
+          let diff = Math.round((player.position - otherPlayer.position) / 2);
+          if (pushDirection === -1) {
+            // ball drops to the right of player
+            game.dropBall(otherPlayer, otherPlayer.position + diff);
+          } else {
+            // ball drops to the left of player
+            game.dropBall(otherPlayer, otherPlayer.position - diff);
+          }
+        }
+        player.tackled = 0;
+        // push _player back and drop ball in between
       }
     }
   }
@@ -71,12 +119,21 @@ class Game {
     if (player.blocksLeft === 0) {
       return;
     }
-    if (player.direction > 0 && player.position + 1 < displaySize) {
-      obstacles.push(new Obstacle(player.position + 1, 3, player));
-      player.blocksLeft -= 1;
+    let otherPlayer = players.filter((p) => p !== player)[0];
+    if (player.direction > 0) {
+      if (
+        player.position + 1 < displaySize &&
+        !this.isInteracting(player.position + 1, otherPlayer.position)
+      ) {
+        obstacles.push(new Obstacle(player.position + 1, player));
+        player.blocksLeft -= 1;
+      }
     } else {
-      if (player.position - 1 > 0)
-        obstacles.push(new Obstacle(player.position - 1, 3, player));
+      if (
+        player.position - 1 > 0 &&
+        !this.isInteracting(player.position - 1, otherPlayer.position)
+      )
+        obstacles.push(new Obstacle(player.position - 1, player));
       player.blocksLeft -= 1;
     }
   }

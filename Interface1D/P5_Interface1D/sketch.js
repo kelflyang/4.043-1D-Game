@@ -32,7 +32,8 @@ function setup() {
   playerOne = new Player(1, color(255, 0, 0), 0);
   playerTwo = new Player(2, color(0, 0, 255), displaySize - 1);
   ball = new Ball(Math.floor(displaySize / 2), color(0, 255, 255));
-  obstacles = [new Obstacle(8, 3, playerTwo)];
+  obstacles = [new Obstacle(8, playerTwo)];
+  players = [playerOne, playerTwo];
 
   game = new Game();
 }
