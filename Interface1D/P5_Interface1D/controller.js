@@ -14,52 +14,24 @@ class Controller {
     // This is where your game logic lives
     /////////////////////////////////////////////////////////////////
     switch (this.gameState) {
-      case "RESTART":
-      // display.off = false;
-      // // display.setPlayers(players);
-
-      // playwerWithItem = players[Math.floor(Math.random() * 1)];
-      // playwerWithItem.receiveItem();
-
-      // This is the main game state, where the playing actually happens
       case "PLAY":
-        // clear screen at frame rate so we always start fresh
-        // display.clear();
+        // check for winner
 
-        // // show all players in the right place, by adding them to display buffer
-        // for (const player of players) {
-        //   // print("player position", player);
-        //   display.setPixel(player.position, player.playerColor);
-        // }
+        if (playerOne.position === 0 && playerOne.hasItem) {
+          this.gameState = "SCORE";
+          console.log("SCORE");
+        }
 
-        // // check if player has picked up the ball
-        // if (this.game.ball.dropped) {
-        //   for (const player of players) {
-        //     if (player.position === this.game.ball.droppedPosition) {
-        //       player.receiveItem();
-        //       this.game.ball.dropped = false;
-        //       print("player picked up ball!");
-        //     }
-        //   }
-        // }
+        if (playerTwo.position === displaySize - 1 && playerTwo.hasItem) {
+          this.gameState = "SCORE";
+          console.log("SCORE");
+        }
 
         break;
 
       // Game is over. Show winner and clean everything up so we can start a new game.
       case "SCORE":
-        display.off = true;
-
-        // find who is the last one with the ball:
-        if (this.game.ball.dropped) {
-          // nobody wins
-        } else {
-          for (const player of players) {
-            if (player.hasItem) {
-              display.setAllPixels(player.playerColor);
-              player.hasItem = false;
-            }
-          }
-        }
+        console.log("SCORE");
 
         break;
 
