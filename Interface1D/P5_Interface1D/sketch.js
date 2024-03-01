@@ -5,7 +5,7 @@
   Marcelo Coelho
 
 */ /////////////////////////////////////
-let displaySize = 30; // how many pixels are visible in the game
+let displaySize = 31; // how many pixels are visible in the game
 let pixelSize = 20; // how big each 'pixel' looks on screen
 
 let game;
@@ -22,99 +22,43 @@ let collisionAnimation; // Where we store and manage the collision animation
 
 let score; // Where we keep track of score and winner
 
-function drawPlayer(set) {
-  // Convert set to array
-  const array = Array.from(set);
-  // Pick a random index
-  const randomIndex = Math.floor(Math.random() * array.length);
-  // Get the element at the random index
-  const randomElement = array[randomIndex];
-  // Remove the element from the set
-  set.delete(randomElement);
-  // Return the randomly drawn element
-  return randomElement;
-}
-
-function getTeam(playerId, teams) {
-  for (i = 0; i < teams.length; i++) {
-    if (playerId in teams[i]) {
-      return i;
-    }
-  }
-}
-
-function generateOrientation() {
-  // Generate a random decimal between 0 and 1
-  const randomDecimal = Math.random();
-  // Convert the random decimal to either 0 or 1
-  const randomBinary = Math.round(randomDecimal);
-  return randomBinary;
-}
+let obstacle;
 
 function setup() {
-  createCanvas(displaySize * pixelSize, pixelSize); // dynamically sets canvas size
+  createCanvas(displaySize * pixelSize, pixelSize);
+  display = new Display(displaySize, pixelSize);
+  controller = new Controller();
 
-  ball = new Ball();
-  display = new Display(displaySize, pixelSize); //Initializing the display
+  playerOne = new Player(1, color(255, 0, 0), 0);
+  playerTwo = new Player(2, color(0, 0, 255), displaySize - 1);
+  ball = new Ball(Math.floor(displaySize / 2), color(0, 255, 255));
+  obstacles = [new Obstacle(8, 3, playerTwo)];
 
-  // initialize pairs of team
-  playerIds = new Set([1, 2, 3, 4]);
-  team1 = [drawPlayer(playerIds), drawPlayer(playerIds)];
-  team2 = Array.from(playerIds);
-  teams = [team1, team2];
-
-  // initialize player
-  playerOne = new Player(
-    1,
-    color(255, 0, 0),
-    parseInt(random(0, displaySize, getTeam(1, teams))),
-    generateOrientation()
-  );
-  playerTwo = new Player(
-    2,
-    color(0, 0, 255),
-    parseInt(random(0, displaySize, getTeam(2, teams))),
-    generateOrientation()
-  );
-  // playerThree = new Player(
-  //   3,
-  //   color(0, 255, 255),
-  //   parseInt(random(0, displaySize)),
-  //   getTeam(3, teams),
-  //   generateOrientation()
-  // );
-  // playerFour = new Player(
-  //   4,
-  //   color(0, 255, 0),
-  //   parseInt(random(0, displaySize)),
-  //   getTeam(4, teams),
-  //   generateOrientation()
-  // );
-
-  players = [playerOne, playerTwo];
-
-  display.setPlayers(players);
-
-  print(players);
-
-  // initialize items
-  playwerWithItem = players[Math.floor(Math.random() * 1)];
-  playwerWithItem.receiveItem();
-
-  timer = new Timer();
-  timer.start();
-
-  game = new Game(players, displaySize, ball, timer);
-  controller = new Controller(game); // Initializing controller
+  game = new Game();
 }
 
 function draw() {
-  // start with a blank screen
-  background(0, 0, 0);
-
-  // Runs state machine at determined framerate
   controller.update();
-
-  // After we've updated our states, we show the current one
   display.show();
+
+  if (keyIsDown(65)) {
+    game.movePlayer(playerOne, -0.2);
+  }
+  if (keyIsDown(68)) {
+    game.movePlayer(playerOne, 0.2);
+  }
+
+  if (keyIsDown(74)) {
+    game.movePlayer(playerTwo, -0.2);
+  }
+  if (keyIsDown(76)) {
+    game.movePlayer(playerTwo, 0.2);
+  }
+
+  playerOne.show();
+  playerTwo.show();
+  ball.show();
+  for (const obstacle of obstacles) {
+    obstacle.show();
+  }
 }
