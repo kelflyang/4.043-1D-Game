@@ -13,8 +13,8 @@ class Player {
 
   show() {
     if (this.hasBall) {
-      stroke(color([0, 255, 255]));
-      strokeWeight(3);
+      stroke(color([255, 255, 0]));
+      strokeWeight(5);
     }
     fill(this.playerColor);
     rect(this.position * pixelSize, 0, pixelSize, pixelSize);
