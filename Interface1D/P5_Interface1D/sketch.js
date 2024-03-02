@@ -27,12 +27,12 @@ let obstacle;
 function setup() {
   createCanvas(displaySize * pixelSize, pixelSize);
   display = new Display(displaySize, pixelSize);
-  controller = new Controller();
 
+  controller = new Controller();
   playerOne = new Player(1, color(0, 0, 0), 0);
   playerTwo = new Player(2, color(255, 255, 255), displaySize - 1);
   ball = new Ball(Math.floor(displaySize / 2), color(255, 255, 0));
-  obstacles = [new Obstacle(8, 3, playerTwo)];
+  obstacles = [new Obstacle(8, 3, playerTwo), new Obstacle(displaySize - 8, 3, playerOne)];
 
   game = new Game();
 }
@@ -41,24 +41,26 @@ function draw() {
   controller.update();
   display.show();
 
-  if (keyIsDown(65)) {
-    game.movePlayer(playerOne, -0.1);
-  }
-  if (keyIsDown(68)) {
-    game.movePlayer(playerOne, 0.1);
-  }
+  // if (keyIsDown(65)) {
+  //   game.movePlayer(playerOne, -0.1);
+  // }
+  // if (keyIsDown(68)) {
+  //   game.movePlayer(playerOne, 0.1);
+  // }
 
-  if (keyIsDown(74)) {
-    game.movePlayer(playerTwo, -0.1);
-  }
-  if (keyIsDown(76)) {
-    game.movePlayer(playerTwo, 0.1);
-  }
+  // if (keyIsDown(74)) {
+  //   game.movePlayer(playerTwo, -0.1);
+  // }
+  // if (keyIsDown(76)) {
+  //   game.movePlayer(playerTwo, 0.1);
+  // }
 
-  playerOne.show();
-  playerTwo.show();
-  ball.show();
   for (const obstacle of obstacles) {
     obstacle.show();
   }
+  
+  playerOne.show();
+  playerTwo.show();
+  ball.show();
+
 }
