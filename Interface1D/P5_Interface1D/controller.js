@@ -42,19 +42,17 @@ class Controller {
   }
 }
 
+function keyReleased() {
+  if (key === "D" || key === "d" || key === "a" || key === "A") {
+    playerOne.acceleratingFactor = 0;
+  }
+  if (key === "J" || key === "j" || key === "L" || key === "l") {
+    playerTwo.acceleratingFactor = 0;
+  }
+  return false; // prevent any default behavior
+}
+
 function keyPressed() {
-  if (key == "A" || key == "a") {
-    game.movePlayer(playerOne, -1);
-  }
-  if (key == "D" || key == "d") {
-    game.movePlayer(playerOne, 1);
-  }
-  if (key == "J" || key == "j") {
-    game.movePlayer(playerTwo, -1);
-  }
-  if (key == "L" || key == "l") {
-    game.movePlayer(playerTwo, 1);
-  }
   if (key == "S" || key == "s") {
     game.tackle(playerOne);
   }

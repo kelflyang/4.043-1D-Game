@@ -11,6 +11,7 @@ class Player {
     this.direction;
     this.tackled = 0;
     this.playerTheme = color(_playerColor);
+    this.acceleratingFactor = 0;
   }
 
   show() {

@@ -5,6 +5,8 @@
   Marcelo Coelho
 
 */ /////////////////////////////////////
+let MAX_SPEED = 0.5;
+let BASE_SPEED = 0.15;
 let displaySize = 60; // how many pixels are visible in the game
 let pixelSize = 20; // how big each 'pixel' looks on screen
 
@@ -46,17 +48,33 @@ function draw() {
   display.show();
 
   if (keyIsDown(65)) {
-    game.movePlayer(playerOne, -0.25);
+    playerOne.acceleratingFactor = Math.max(
+      playerOne.acceleratingFactor + 0.01,
+      0.15
+    );
+    game.movePlayer(playerOne, -BASE_SPEED - playerOne.acceleratingFactor);
   }
   if (keyIsDown(68)) {
-    game.movePlayer(playerOne, 0.25);
+    playerOne.acceleratingFactor = Math.max(
+      playerOne.acceleratingFactor + 0.01,
+      0.15
+    );
+    game.movePlayer(playerOne, BASE_SPEED + playerOne.acceleratingFactor);
   }
 
   if (keyIsDown(74)) {
-    game.movePlayer(playerTwo, -0.25);
+    playerTwo.acceleratingFactor = Math.max(
+      playerTwo.acceleratingFactor + 0.01,
+      0.15
+    );
+    game.movePlayer(playerTwo, -BASE_SPEED - playerTwo.acceleratingFactor);
   }
   if (keyIsDown(76)) {
-    game.movePlayer(playerTwo, 0.25);
+    playerTwo.acceleratingFactor = Math.max(
+      playerTwo.acceleratingFactor + 0.01,
+      0.15
+    );
+    game.movePlayer(playerTwo, BASE_SPEED + playerTwo.acceleratingFactor);
   }
 
   for (const obstacle of obstacles) {
