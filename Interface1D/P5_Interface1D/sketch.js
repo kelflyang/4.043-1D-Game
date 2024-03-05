@@ -5,7 +5,7 @@
   Marcelo Coelho
 
 */ /////////////////////////////////////
-let displaySize = 31; // how many pixels are visible in the game
+let displaySize = 60; // how many pixels are visible in the game
 let pixelSize = 20; // how big each 'pixel' looks on screen
 
 let game;
@@ -27,14 +27,17 @@ let obstacle;
 function setup() {
   createCanvas(displaySize * pixelSize, pixelSize);
   display = new Display(displaySize, pixelSize);
+
   controller = new Controller();
+  playerOne = new Player(1, [0, 0, 0], 0);
+  playerTwo = new Player(2, [255, 255, 255], displaySize - 1);
+  ball = new Ball(Math.floor(displaySize / 2), color(255, 255, 0));
+  obstacles = [
+    new Obstacle(8, playerTwo),
+    new Obstacle(displaySize - 8, playerOne),
+  ];
 
-  playerOne = new Player(1, color(255, 0, 0), 0);
-  playerTwo = new Player(2, color(0, 0, 255), displaySize - 1);
-  ball = new Ball(Math.floor(displaySize / 2), color(0, 255, 255));
-  obstacles = [new Obstacle(8, playerTwo)];
   players = [playerOne, playerTwo];
-
   game = new Game();
 }
 
@@ -43,23 +46,24 @@ function draw() {
   display.show();
 
   if (keyIsDown(65)) {
-    game.movePlayer(playerOne, -0.2);
+    game.movePlayer(playerOne, -0.25);
   }
   if (keyIsDown(68)) {
-    game.movePlayer(playerOne, 0.2);
+    game.movePlayer(playerOne, 0.25);
   }
 
   if (keyIsDown(74)) {
-    game.movePlayer(playerTwo, -0.2);
+    game.movePlayer(playerTwo, -0.25);
   }
   if (keyIsDown(76)) {
-    game.movePlayer(playerTwo, 0.2);
+    game.movePlayer(playerTwo, 0.25);
+  }
+
+  for (const obstacle of obstacles) {
+    obstacle.show();
   }
 
   playerOne.show();
   playerTwo.show();
   ball.show();
-  for (const obstacle of obstacles) {
-    obstacle.show();
-  }
 }

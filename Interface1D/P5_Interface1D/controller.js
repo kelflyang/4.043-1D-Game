@@ -43,6 +43,18 @@ class Controller {
 }
 
 function keyPressed() {
+  if (key == "A" || key == "a") {
+    game.movePlayer(playerOne, -1);
+  }
+  if (key == "D" || key == "d") {
+    game.movePlayer(playerOne, 1);
+  }
+  if (key == "J" || key == "j") {
+    game.movePlayer(playerTwo, -1);
+  }
+  if (key == "L" || key == "l") {
+    game.movePlayer(playerTwo, 1);
+  }
   if (key == "S" || key == "s") {
     game.tackle(playerOne);
   }
