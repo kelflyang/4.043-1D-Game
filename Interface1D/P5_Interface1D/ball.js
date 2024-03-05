@@ -7,6 +7,8 @@ class Ball {
 
   show() {
     if (this.isDropped) {
+      // translate(random(-5, 5), random(-5, 5));
+
       fill(this.ballColor);
       rect(this.position * pixelSize, 0, pixelSize, pixelSize);
     }

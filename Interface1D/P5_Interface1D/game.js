@@ -13,6 +13,7 @@ class Game {
       }
 
       if (this.isInteracting(newPosition, obstacle.position)) {
+        print("detected obstacle");
         return obstacle;
       }
     }
@@ -51,6 +52,40 @@ class Game {
     }
   }
 
+  calibrateNewPosition(player, direction, newPosition) {
+    let maxPos = Math.max(player.position, newPosition);
+    let minPos = Math.min(player.position, newPosition);
+    let minDiff;
+    if (direction < 0) {
+      newPosition = Math.max(newPosition, 0);
+    }
+    if (direction > 0) {
+      newPosition = Math.min(newPosition, displaySize - 1);
+    }
+    for (const obstacle of obstacles) {
+      if (
+        obstacle.player.playerId === player.playerId ||
+        obstacle.durability < 1
+      ) {
+        continue;
+      }
+      if (
+        obstacle.position > minPos &&
+        obstacle.position < maxPos &&
+        (minDiff === undefined ||
+          Math.abs(obstacle.position - player.position) < minDiff)
+      ) {
+        if (newPosition < obstacle.position) {
+          newPosition = obstacle.position + 1;
+        } else {
+          newPosition = obstacle.position - 1;
+        }
+        minDiff = Math.abs(obstacle.position - player.position);
+      }
+    }
+    return newPosition;
+  }
+
   movePlayer(player, direction) {
     let newPosition;
     player.direction = direction;
@@ -64,8 +99,10 @@ class Game {
     if (obstacle) {
       if (direction > 0) {
         newPosition = obstacle.position - 1;
+        print("pushing right");
       } else {
         newPosition = obstacle.position + 1;
+        print("pushing left");
       }
     }
     player.position = newPosition;
@@ -81,34 +118,51 @@ class Game {
         this.isInteracting(player.position, obstacle.position) &&
         obstacle.player !== player
       ) {
+        obstacle.hit = true;
         obstacle.durability -= 1;
       }
     }
 
     // TRY TACKLING OTHER PLAYER
-    console.log("try tackling other player");
     let otherPlayer = players.filter((p) => p !== player)[0];
     if (this.isInteracting(player.position, otherPlayer.position)) {
       console.log("Tackling other player!");
-      otherPlayer.tackled += 1;
+      otherPlayer.tackledTimes += 1;
       let pushDirection = otherPlayer.position > player.position ? 1 : -1;
       console.log("push direction ", pushDirection);
-      if (otherPlayer.tackled === 1) {
+      if (otherPlayer.tackledTimes === 1) {
+        let newPosition = game.calibrateNewPosition(
+          otherPlayer,
+          pushDirection,
+          pushDirection * PUSH_RANGE + otherPlayer.position
+        );
+        print("calibrated position is ", newPosition);
+        otherPlayer.newPosition = newPosition;
+        otherPlayer.tackled = true;
+
         // push _player back
-        game.movePlayer(otherPlayer, pushDirection * PUSH_RANGE);
+        // game.movePlayer(otherPlayer, pushDirection * PUSH_RANGE);
       } else {
-        game.movePlayer(otherPlayer, pushDirection * PUSH_RANGE);
+        // game.movePlayer(otherPlayer, pushDirection * PUSH_RANGE);
+        let newPosition = game.calibrateNewPosition(
+          otherPlayer,
+          pushDirection,
+          pushDirection * PUSH_RANGE + otherPlayer.position
+        );
+        otherPlayer.tackled = true;
+        otherPlayer.newPosition = newPosition;
+        print("calibrated position is ", newPosition);
         if (otherPlayer.hasBall) {
-          let diff = Math.round((player.position - otherPlayer.position) / 2);
+          let diff = Math.round(Math.abs(player.position - newPosition) / 2);
           if (pushDirection === -1) {
             // ball drops to the right of player
-            game.dropBall(otherPlayer, otherPlayer.position + diff);
+            game.dropBall(otherPlayer, newPosition + diff);
           } else {
             // ball drops to the left of player
-            game.dropBall(otherPlayer, otherPlayer.position - diff);
+            game.dropBall(otherPlayer, newPosition - diff);
           }
         }
-        player.tackled = 0;
+        otherPlayer.tackledTimes = 0;
         // push _player back and drop ball in between
       }
     }
