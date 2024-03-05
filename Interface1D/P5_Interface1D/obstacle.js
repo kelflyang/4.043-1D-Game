@@ -8,10 +8,6 @@ class Obstacle {
 
   show() {
     if (this.durability > 0) {
-      // this.player.playerColor.setAlpha(128);
-      // fill(this.player.playerColor);
-      // rect(this.position * pixelSize, 0, pixelSize, pixelSize);
-
       // Calculate alpha based on durability
       noStroke();
       let alpha = (255 * this.durability) / 3.5; // Adjust 100 to your maximum durability

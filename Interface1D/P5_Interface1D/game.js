@@ -82,7 +82,6 @@ class Game {
         obstacle.player !== player
       ) {
         obstacle.durability -= 1;
-        return;
       }
     }
 
@@ -139,7 +138,6 @@ class Game {
   }
 
   isInteracting(position1, position2) {
-    console.log(position1, position2);
     if (
       (position1 <= position2 && position1 >= position2 - 1) ||
       (position1 >= position2 && position1 <= position2 + 1)

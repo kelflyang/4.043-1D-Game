@@ -26,6 +26,8 @@ let score; // Where we keep track of score and winner
 
 let obstacle;
 
+let obstaclesCount;
+
 function generateObstacles(displaySize, playerOne, playerTwo, obstaclesCount) {
   // generate obstacles symmetrically, assumes displaySize is odd
   let maxOffset = Math.round(displaySize / 2) - 1;
@@ -44,12 +46,18 @@ function generateObstacles(displaySize, playerOne, playerTwo, obstaclesCount) {
 function setup() {
   createCanvas(displaySize * pixelSize, pixelSize);
   display = new Display(displaySize, pixelSize);
+  obstaclesCount = 1;
 
   controller = new Controller();
   playerOne = new Player(1, [0, 0, 0], 0);
   playerTwo = new Player(2, [255, 255, 255], displaySize - 1);
   ball = new Ball(Math.floor(displaySize / 2), color(255, 255, 0));
-  obstacles = generateObstacles(displaySize, playerOne, playerTwo, 3);
+  obstacles = generateObstacles(
+    displaySize,
+    playerOne,
+    playerTwo,
+    obstaclesCount
+  );
 
   players = [playerOne, playerTwo];
   game = new Game();

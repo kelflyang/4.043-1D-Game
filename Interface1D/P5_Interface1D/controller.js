@@ -1,11 +1,9 @@
 // This is where your state machines and game logic lives
-// let TIME_LIMIT = 30000;
-let TIME_LIMIT = 3000;
 class Controller {
   // This is the state we start with.
-  constructor(_game) {
-    this.game = _game;
+  constructor() {
     this.gameState = "PLAY";
+    this.maxScore = 3;
   }
 
   // This is called from draw() in sketch.js with every frame
@@ -17,23 +15,54 @@ class Controller {
       case "PLAY":
         // check for winner
 
-        if (playerOne.position === 0 && playerOne.hasItem) {
-          this.gameState = "SCORE";
-          console.log("SCORE");
+        if (playerOne.position === 0 && playerOne.hasBall) {
+          playerOne.score += 1;
+          if (
+            playerOne.score >= this.maxScore ||
+            playerTwo.maxScore >= this.maxScore
+          ) {
+            this.gameState = "SCORE";
+          } else {
+            this.gameState = "NEW_ROUND";
+          }
         }
 
-        if (playerTwo.position === displaySize - 1 && playerTwo.hasItem) {
-          this.gameState = "SCORE";
-          console.log("SCORE");
+        if (playerTwo.position === displaySize - 1 && playerTwo.hasBall) {
+          playerTwo.score += 1;
+          if (playerOne.maxScore >= 3 || playerTwo.maxScore >= 3) {
+            this.gameState = "SCORE";
+          } else {
+            this.gameState = "NEW_ROUND";
+          }
         }
 
         break;
+
+      case "NEW_ROUND":
+        ball = new Ball(Math.floor(displaySize / 2), color(255, 255, 0));
+        obstaclesCount += 1;
+        obstacles = generateObstacles(
+          displaySize,
+          playerOne,
+          playerTwo,
+          obstaclesCount
+        );
+
+        playerOne.hasBall = false;
+        playerTwo.hasBall = false;
+        playerOne.position = 0;
+        playerTwo.position = displaySize - 1;
+        this.gameState = "PLAY";
 
       // Game is over. Show winner and clean everything up so we can start a new game.
       case "SCORE":
-        console.log("SCORE");
+        if (playerOne.score >= this.maxScore) {
+          print("playerOne wins!");
+        }
 
-        break;
+        if (playerTwo.score >= this.maxScore) {
+          print("playerTwo wins!");
+        }
 
       // Not used, it's here just for code compliance
       default:

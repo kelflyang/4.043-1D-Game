@@ -12,6 +12,7 @@ class Player {
     this.tackled = 0;
     this.playerTheme = color(_playerColor);
     this.acceleratingFactor = 0;
+    this.score = 0;
   }
 
   show() {
