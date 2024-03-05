@@ -39,7 +39,7 @@ class Player {
 
       setTimeout(() => {
         this.tackled = false;
-      }, 1000);
+      }, 500);
     }
 
     if (this.hasBall) {

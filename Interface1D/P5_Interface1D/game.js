@@ -131,35 +131,48 @@ class Game {
       let pushDirection = otherPlayer.position > player.position ? 1 : -1;
       console.log("push direction ", pushDirection);
       if (otherPlayer.tackledTimes === 1) {
-        let newPosition = game.calibrateNewPosition(
+        let otherNewPosition = game.calibrateNewPosition(
           otherPlayer,
           pushDirection,
           pushDirection * PUSH_RANGE + otherPlayer.position
         );
-        print("calibrated position is ", newPosition);
-        otherPlayer.newPosition = newPosition;
+        let newPosition = game.calibrateNewPosition(
+          player,
+          -pushDirection,
+          -pushDirection * PUSH_RANGE + player.position
+        );
+
+        otherPlayer.newPosition = otherNewPosition;
         otherPlayer.tackled = true;
+        player.tackled = true;
+        player.newPosition = newPosition;
 
         // push _player back
         // game.movePlayer(otherPlayer, pushDirection * PUSH_RANGE);
       } else {
         // game.movePlayer(otherPlayer, pushDirection * PUSH_RANGE);
-        let newPosition = game.calibrateNewPosition(
+        let otherNewPosition = game.calibrateNewPosition(
           otherPlayer,
           pushDirection,
           pushDirection * PUSH_RANGE + otherPlayer.position
         );
+
+        let newPosition = game.calibrateNewPosition(
+          player,
+          -pushDirection,
+          -pushDirection * PUSH_RANGE + player.position
+        );
         otherPlayer.tackled = true;
-        otherPlayer.newPosition = newPosition;
-        print("calibrated position is ", newPosition);
+        otherPlayer.newPosition = otherNewPosition;
+        player.tackled = true;
+        player.newPosition = newPosition;
         if (otherPlayer.hasBall) {
-          let diff = Math.round(Math.abs(player.position - newPosition) / 2);
           if (pushDirection === -1) {
             // ball drops to the right of player
-            game.dropBall(otherPlayer, newPosition + diff);
+            game.dropBall(otherPlayer, otherPlayer.position);
           } else {
             // ball drops to the left of player
-            game.dropBall(otherPlayer, newPosition - diff);
+            game.dropBall(otherPlayer, otherPlayer.position);
           }
         }
         otherPlayer.tackledTimes = 0;
