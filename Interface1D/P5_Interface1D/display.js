@@ -6,21 +6,21 @@ class Display {
   constructor(_displaySize, _pixelSize) {
     this.displaySize = _displaySize;
     this.pixelSize = _pixelSize;
-    this.displayColor = color(0, 140, 3);
+    this.displayColor = color(97, 75, 62);
   }
 
   show() {
+    // noStroke();
     for (let i = 0; i < this.displaySize; i++) {
-      if (i == 0 || i == this.displaySize - 1){
+      if (i == 0 || i == this.displaySize - 1) {
         fill(this.displayColor);
-        stroke(0, 112, 2);
+        // stroke(218, 218, 218);
         rect(i * this.pixelSize, 0, this.pixelSize + 5, this.pixelSize);
       } else {
         fill(this.displayColor);
-        stroke(0, 112, 2);
+        // stroke(218, 218, 218);
         rect(i * this.pixelSize, 0, this.pixelSize, this.pixelSize);
       }
-      
     }
     // // Court dimensions (adjust as needed)
     // const courtWidth = 1000;
@@ -37,6 +37,5 @@ class Display {
     // arc(laneWidth, courtHeight, radius * 2, radius * 2, PI, 0);
     // arc(courtWidth - laneWidth, courtHeight, radius * 2, radius * 2, 0, PI);
     // ellipse(courtWidth / 2, courtHeight, radius * 2, radius * 2);
-    
   }
 }

@@ -15,6 +15,7 @@ class Player {
     this.score = 0;
     this.tackled = false;
     this.newPosition;
+    this.translate = 0;
   }
 
   show() {
@@ -35,11 +36,24 @@ class Player {
         this.position -= Math.abs(this.newPosition - this.position) / 5;
       }
 
-      print("this position ", this.position);
+      // Add a random offset to block position to simulate shaking
+      if (this.translate === 0) {
+        this.translate += 1;
+        this.position += 0.15;
+      } else if (this.translate === 1) {
+        this.translate += 1;
+        this.position -= 0.15;
+      } else if (this.translate === 2) {
+        this.translate += 1;
+        this.position -= 0.15;
+      } else if (this.translate === 3) {
+        this.translate = 0;
+        this.position += 0.15;
+      }
 
       setTimeout(() => {
         this.tackled = false;
-      }, 500);
+      }, 300);
     }
 
     if (this.hasBall) {

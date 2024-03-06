@@ -12,10 +12,27 @@ class Controller {
     // This is where your game logic lives
     /////////////////////////////////////////////////////////////////
     switch (this.gameState) {
+      case "START":
+        MAX_SPEED = 0.001;
+        BASE_SPEED = 0.0001;
+        BLOCKS_LEFT = 2;
+        SPEED_INCREMENT = 0.0001;
+        displaySize = 31; // how many pixels are visible in the game
+        display = new Display(displaySize, pixelSize);
+        obstaclesCount = 1;
+
+        playerOne = new Player(1, [255, 94, 0], 0);
+        playerTwo = new Player(2, [255, 255, 255], displaySize - 1);
+        ball = new Ball(Math.floor(displaySize / 2), color(255, 255, 0));
+        obstacles = generateObstacles(displaySize, playerOne, playerTwo, 1);
+
+        players = [playerOne, playerTwo];
+        game = new Game();
+        this.gameState = "PLAY";
       case "PLAY":
         // check for winner
 
-        if (playerOne.position === 0 && playerOne.hasBall) {
+        if (playerOne.position === displaySize - 1 && playerOne.hasBall) {
           playerOne.score += 1;
           if (
             playerOne.score >= this.maxScore ||
@@ -27,7 +44,7 @@ class Controller {
           }
         }
 
-        if (playerTwo.position === displaySize - 1 && playerTwo.hasBall) {
+        if (playerTwo.position === 0 && playerTwo.hasBall) {
           playerTwo.score += 1;
           if (playerOne.maxScore >= 3 || playerTwo.maxScore >= 3) {
             this.gameState = "SCORE";
@@ -39,8 +56,16 @@ class Controller {
         break;
 
       case "NEW_ROUND":
+        displaySize = Math.round(displaySize * 1.5);
+        display.displaySize = displaySize;
         ball = new Ball(Math.floor(displaySize / 2), color(255, 255, 0));
-        obstaclesCount += 1;
+        // obstaclesCount += 1;
+        MAX_SPEED += 0.0015;
+        BASE_SPEED += 0.00015;
+        SPEED_INCREMENT += 0.00015;
+        BLOCKS_LEFT += 1;
+        playerOne.blocksLeft = BLOCKS_LEFT;
+        playerTwo.blocksLeft = BLOCKS_LEFT;
         obstacles = generateObstacles(
           displaySize,
           playerOne,
@@ -96,5 +121,8 @@ function keyPressed() {
 
   if (key == "I" || key == "i") {
     game.placeObstacle(playerTwo);
+  }
+  if (key == "R" || key == "r") {
+    controller.gameState = "START";
   }
 }

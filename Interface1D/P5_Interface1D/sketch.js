@@ -5,9 +5,11 @@
   Marcelo Coelho
 
 */ /////////////////////////////////////
-let MAX_SPEED = 0.5;
-let BASE_SPEED = 0.15;
-let displaySize = 60; // how many pixels are visible in the game
+let MAX_SPEED = 0.001;
+let BASE_SPEED = 0.0001;
+let BLOCKS_LEFT = 2;
+let SPEED_INCREMENT = 0.0001;
+let displaySize = 31; // how many pixels are visible in the game
 let pixelSize = 20; // how big each 'pixel' looks on screen
 
 let game;
@@ -30,71 +32,78 @@ let obstaclesCount;
 
 function generateObstacles(displaySize, playerOne, playerTwo, obstaclesCount) {
   // generate obstacles symmetrically, assumes displaySize is odd
-  let maxOffset = Math.round(displaySize / 2) - 1;
+  let maxOffset = Math.round(displaySize / 2) - 2;
   let minOffset = 1;
   let obstacles = [];
 
   for (let i = 0; i < obstaclesCount; i++) {
     let offSet = Math.random() * (maxOffset - minOffset) + minOffset;
     obstacles.push(new Obstacle(offSet, playerTwo));
-    obstacles.push(new Obstacle(displaySize - offSet, playerOne));
+    obstacles.push(new Obstacle(displaySize - offSet - 1, playerOne));
     // minOffset = offSet;
   }
   return obstacles;
 }
 
 function setup() {
-  createCanvas(displaySize * pixelSize, pixelSize);
   display = new Display(displaySize, pixelSize);
   obstaclesCount = 1;
 
   controller = new Controller();
-  playerOne = new Player(1, [0, 0, 0], 0);
+  playerOne = new Player(1, [255, 94, 0], 0);
   playerTwo = new Player(2, [255, 255, 255], displaySize - 1);
   ball = new Ball(Math.floor(displaySize / 2), color(255, 255, 0));
-  obstacles = generateObstacles(
-    displaySize,
-    playerOne,
-    playerTwo,
-    obstaclesCount
-  );
+  obstacles = generateObstacles(displaySize, playerOne, playerTwo, 1);
 
   players = [playerOne, playerTwo];
   game = new Game();
 }
 
 function draw() {
+  createCanvas(displaySize * pixelSize, pixelSize);
   controller.update();
   display.show();
 
   if (keyIsDown(65)) {
     playerOne.acceleratingFactor = Math.max(
-      playerOne.acceleratingFactor + 0.01,
+      playerOne.acceleratingFactor + 0.0001,
       0.15
     );
-    game.movePlayer(playerOne, -BASE_SPEED - playerOne.acceleratingFactor);
+    game.movePlayer(
+      playerOne,
+      Math.min(-BASE_SPEED - playerOne.acceleratingFactor, -MAX_SPEED)
+    );
   }
   if (keyIsDown(68)) {
     playerOne.acceleratingFactor = Math.max(
-      playerOne.acceleratingFactor + 0.01,
+      playerOne.acceleratingFactor + 0.0001,
       0.15
     );
-    game.movePlayer(playerOne, BASE_SPEED + playerOne.acceleratingFactor);
+    game.movePlayer(
+      playerOne,
+      Math.max(BASE_SPEED + playerOne.acceleratingFactor, MAX_SPEED)
+    );
   }
 
   if (keyIsDown(74)) {
     playerTwo.acceleratingFactor = Math.max(
-      playerTwo.acceleratingFactor + 0.01,
+      playerTwo.acceleratingFactor + 0.0001,
       0.15
     );
-    game.movePlayer(playerTwo, -BASE_SPEED - playerTwo.acceleratingFactor);
+    game.movePlayer(
+      playerTwo,
+      Math.min(-BASE_SPEED - playerTwo.acceleratingFactor, -MAX_SPEED)
+    );
   }
   if (keyIsDown(76)) {
     playerTwo.acceleratingFactor = Math.max(
-      playerTwo.acceleratingFactor + 0.01,
+      playerTwo.acceleratingFactor + 0.0001,
       0.15
     );
-    game.movePlayer(playerTwo, BASE_SPEED + playerTwo.acceleratingFactor);
+    game.movePlayer(
+      playerTwo,
+      Math.max(BASE_SPEED + playerTwo.acceleratingFactor, MAX_SPEED)
+    );
   }
 
   for (const obstacle of obstacles) {

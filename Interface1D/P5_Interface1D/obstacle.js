@@ -6,6 +6,7 @@ class Obstacle {
     this.durability = DURABILITY;
     this.hit = false;
     this.translate = 0;
+    this.originalPosition;
   }
 
   show() {
@@ -28,10 +29,11 @@ class Obstacle {
         }
         setTimeout(() => {
           this.hit = false;
+          this.position = this.originalPosition;
         }, 750);
       }
       noStroke();
-      let alpha = (255 * this.durability) / 3.5; // Adjust 100 to your maximum durability
+      let alpha = (255 * this.durability) / 5; // Adjust 100 to your maximum durability
       let transparentColor = this.player.playerTheme;
       transparentColor.setAlpha(alpha);
       fill(transparentColor);

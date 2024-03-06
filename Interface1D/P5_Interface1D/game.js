@@ -1,5 +1,5 @@
 // game state keeps track of
-let PUSH_RANGE = 5;
+let PUSH_RANGE = 3;
 class Game {
   constructor() {}
 
@@ -111,6 +111,21 @@ class Game {
     }
   }
 
+  notInterruptedByObstacles(player, otherPlayer) {
+    let minPos = Math.min(player, otherPlayer);
+    let maxPos = Math.max(player, otherPlayer);
+    for (const obstacle of obstacles) {
+      if (
+        obstacle.position <= maxPos &&
+        obstacle.position >= minPos &&
+        obstacle.durability > 0
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   tackle(player) {
     // TRY TACKLING OBSTACLES
     for (const obstacle of obstacles) {
@@ -119,13 +134,18 @@ class Game {
         obstacle.player !== player
       ) {
         obstacle.hit = true;
+        obstacle.originalPosition = obstacle.position;
         obstacle.durability -= 1;
+        return;
       }
     }
 
     // TRY TACKLING OTHER PLAYER
     let otherPlayer = players.filter((p) => p !== player)[0];
-    if (this.isInteracting(player.position, otherPlayer.position)) {
+    if (
+      this.isInteracting(player.position, otherPlayer.position, 3) &&
+      this.notInterruptedByObstacles(player.position, otherPlayer.position)
+    ) {
       console.log("Tackling other player!");
       otherPlayer.tackledTimes += 1;
       let pushDirection = otherPlayer.position > player.position ? 1 : -1;
@@ -167,13 +187,7 @@ class Game {
         player.tackled = true;
         player.newPosition = newPosition;
         if (otherPlayer.hasBall) {
-          if (pushDirection === -1) {
-            // ball drops to the right of player
-            game.dropBall(otherPlayer, otherPlayer.position);
-          } else {
-            // ball drops to the left of player
-            game.dropBall(otherPlayer, otherPlayer.position);
-          }
+          game.dropBall(otherPlayer, otherPlayer.position);
         }
         otherPlayer.tackledTimes = 0;
         // push _player back and drop ball in between
@@ -204,10 +218,10 @@ class Game {
     }
   }
 
-  isInteracting(position1, position2) {
+  isInteracting(position1, position2, radius = 0) {
     if (
-      (position1 <= position2 && position1 >= position2 - 1) ||
-      (position1 >= position2 && position1 <= position2 + 1)
+      (position1 <= position2 && position1 >= position2 - (1 + radius)) ||
+      (position1 >= position2 && position1 <= position2 + (1 + radius))
     ) {
       print("is interacting");
       return true;
