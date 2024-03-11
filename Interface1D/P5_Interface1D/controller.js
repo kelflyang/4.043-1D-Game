@@ -19,20 +19,33 @@ class Controller {
         SPEED_INCREMENT = 0.0001;
         displaySize = 31; // how many pixels are visible in the game
         display = new Display(displaySize, pixelSize);
+        createCanvas(displaySize * pixelSize, pixelSize);
         obstaclesCount = 1;
 
         playerOne = new Player(1, [255, 94, 0], 0);
-        playerTwo = new Player(2, [255, 255, 255], displaySize - 1);
-        ball = new Ball(Math.floor(displaySize / 2), color(255, 255, 0));
-        obstacles = generateObstacles(displaySize, playerOne, playerTwo, 1);
+        playerTwo = new Player(2, [255, 255, 255], display.displaySize - 1);
+        ball = new Ball(
+          Math.floor(display.displaySize / 2),
+          color(255, 255, 0)
+        );
+        obstacles = generateObstacles(
+          display.displaySize,
+          playerOne,
+          playerTwo,
+          1
+        );
 
         players = [playerOne, playerTwo];
         game = new Game();
+
         this.gameState = "PLAY";
       case "PLAY":
         // check for winner
 
-        if (playerOne.position === displaySize - 1 && playerOne.hasBall) {
+        if (
+          playerOne.position === display.displaySize - 1 &&
+          playerOne.hasBall
+        ) {
           playerOne.score += 1;
           if (
             playerOne.score >= this.maxScore ||
@@ -56,32 +69,15 @@ class Controller {
         break;
 
       case "NEW_ROUND":
-        displaySize = Math.round(displaySize * 1.5);
-        display.displaySize = displaySize;
-        ball = new Ball(Math.floor(displaySize / 2), color(255, 255, 0));
-        // obstaclesCount += 1;
-        MAX_SPEED += 0.0015;
-        BASE_SPEED += 0.00015;
-        SPEED_INCREMENT += 0.00015;
-        BLOCKS_LEFT += 1;
-        playerOne.blocksLeft = BLOCKS_LEFT;
-        playerTwo.blocksLeft = BLOCKS_LEFT;
-        obstacles = generateObstacles(
-          displaySize,
-          playerOne,
-          playerTwo,
-          obstaclesCount
-        );
+        newDisplaySize = display.displaySize + 15;
+        roundTransition = true;
 
-        playerOne.hasBall = false;
-        playerTwo.hasBall = false;
-        playerOne.position = 0;
-        playerTwo.position = displaySize - 1;
         this.gameState = "PLAY";
 
       // Game is over. Show winner and clean everything up so we can start a new game.
       case "SCORE":
         if (playerOne.score >= this.maxScore) {
+          // clear everything
           print("playerOne wins!");
         }
 

@@ -60,7 +60,7 @@ class Game {
       newPosition = Math.max(newPosition, 0);
     }
     if (direction > 0) {
-      newPosition = Math.min(newPosition, displaySize - 1);
+      newPosition = Math.min(newPosition, display.displaySize - 1);
     }
     for (const obstacle of obstacles) {
       if (
@@ -93,7 +93,10 @@ class Game {
       newPosition = Math.max(player.position + direction, 0);
     }
     if (direction > 0) {
-      newPosition = Math.min(player.position + direction, displaySize - 1);
+      newPosition = Math.min(
+        player.position + direction,
+        display.displaySize - 1
+      );
     }
     let obstacle = this.isTouchingObstacle(player, newPosition);
     if (obstacle) {
@@ -131,7 +134,8 @@ class Game {
     for (const obstacle of obstacles) {
       if (
         this.isInteracting(player.position, obstacle.position) &&
-        obstacle.player !== player
+        obstacle.player !== player &&
+        obstacle.durability > 0
       ) {
         obstacle.hit = true;
         obstacle.originalPosition = obstacle.position;
@@ -184,11 +188,20 @@ class Game {
         );
         otherPlayer.tackled = true;
         otherPlayer.newPosition = otherNewPosition;
+
         player.tackled = true;
         player.newPosition = newPosition;
         if (otherPlayer.hasBall) {
-          game.dropBall(otherPlayer, otherPlayer.position);
+          let newBallPos =
+            pushDirection > 1
+              ? player.position + (otherPlayer.position - player.position) / 2
+              : otherPlayer.position +
+                (player.position - otherPlayer.position) / 2;
+          setTimeout(() => {
+            game.dropBall(otherPlayer, newBallPos);
+          }, 100);
         }
+
         otherPlayer.tackledTimes = 0;
         // push _player back and drop ball in between
       }
@@ -202,7 +215,7 @@ class Game {
     let otherPlayer = players.filter((p) => p !== player)[0];
     if (player.direction > 0) {
       if (
-        player.position + 1 < displaySize &&
+        player.position + 1 < display.displaySize &&
         !this.isInteracting(player.position + 1, otherPlayer.position)
       ) {
         obstacles.push(new Obstacle(player.position + 1, player));
