@@ -4,6 +4,7 @@ class Controller {
   constructor() {
     this.gameState = "PLAY";
     this.maxScore = 3;
+    this.pause;
   }
 
   // This is called from draw() in sketch.js with every frame
@@ -13,6 +14,7 @@ class Controller {
     /////////////////////////////////////////////////////////////////
     switch (this.gameState) {
       case "START":
+        controller.pause = false;
         MAX_SPEED = 0.001;
         BASE_SPEED = 0.0001;
         BLOCKS_LEFT = 2;
@@ -40,6 +42,7 @@ class Controller {
 
         this.gameState = "PLAY";
       case "PLAY":
+        controller.pause = false;
         // check for winner
 
         if (
@@ -49,7 +52,7 @@ class Controller {
           playerOne.score += 1;
           if (
             playerOne.score >= this.maxScore ||
-            playerTwo.maxScore >= this.maxScore
+            playerTwo.score >= this.maxScore
           ) {
             this.gameState = "SCORE";
           } else {
@@ -69,20 +72,32 @@ class Controller {
         break;
 
       case "NEW_ROUND":
+        controller.pause = true;
         newDisplaySize = display.displaySize + 15;
         roundTransition = true;
-
         this.gameState = "PLAY";
 
       // Game is over. Show winner and clean everything up so we can start a new game.
       case "SCORE":
-        if (playerOne.score >= this.maxScore) {
-          // clear everything
-          print("playerOne wins!");
-        }
+        // clear everything
 
-        if (playerTwo.score >= this.maxScore) {
-          print("playerTwo wins!");
+        if (
+          playerOne.score >= this.maxScore ||
+          playerTwo.score >= this.maxScore
+        ) {
+          this.pause = true;
+          playerOne.hasBall = false;
+          playerTwo.hasBall = false;
+          obstacles = [];
+          ball.position = -1;
+
+          if (playerOne.score >= this.maxScore) {
+            playerTwo.position = -1;
+            playerOne.lap = true;
+          } else {
+            plarerOne.position = -1;
+            playerTwo.lap = true;
+          }
         }
 
       // Not used, it's here just for code compliance
@@ -93,6 +108,9 @@ class Controller {
 }
 
 function keyReleased() {
+  if (controller.pause) {
+    return;
+  }
   if (key === "D" || key === "d" || key === "a" || key === "A") {
     playerOne.acceleratingFactor = 0;
   }
@@ -103,6 +121,9 @@ function keyReleased() {
 }
 
 function keyPressed() {
+  if (controller.pause) {
+    return;
+  }
   if (key == "S" || key == "s") {
     game.tackle(playerOne);
   }

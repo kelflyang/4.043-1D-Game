@@ -72,46 +72,48 @@ function draw() {
     controller.update();
     display.show();
 
-    if (keyIsDown(65)) {
-      playerOne.acceleratingFactor = Math.max(
-        playerOne.acceleratingFactor + 0.0001,
-        0.15
-      );
-      game.movePlayer(
-        playerOne,
-        Math.min(-BASE_SPEED - playerOne.acceleratingFactor, -MAX_SPEED)
-      );
-    }
-    if (keyIsDown(68)) {
-      playerOne.acceleratingFactor = Math.max(
-        playerOne.acceleratingFactor + 0.0001,
-        0.15
-      );
-      game.movePlayer(
-        playerOne,
-        Math.max(BASE_SPEED + playerOne.acceleratingFactor, MAX_SPEED)
-      );
-    }
+    if (!controller.pause) {
+      if (keyIsDown(65)) {
+        playerOne.acceleratingFactor = Math.max(
+          playerOne.acceleratingFactor + 0.0001,
+          0.15
+        );
+        game.movePlayer(
+          playerOne,
+          Math.min(-BASE_SPEED - playerOne.acceleratingFactor, -MAX_SPEED)
+        );
+      }
+      if (keyIsDown(68)) {
+        playerOne.acceleratingFactor = Math.max(
+          playerOne.acceleratingFactor + 0.0001,
+          0.15
+        );
+        game.movePlayer(
+          playerOne,
+          Math.max(BASE_SPEED + playerOne.acceleratingFactor, MAX_SPEED)
+        );
+      }
 
-    if (keyIsDown(74)) {
-      playerTwo.acceleratingFactor = Math.max(
-        playerTwo.acceleratingFactor + 0.0001,
-        0.15
-      );
-      game.movePlayer(
-        playerTwo,
-        Math.min(-BASE_SPEED - playerTwo.acceleratingFactor, -MAX_SPEED)
-      );
-    }
-    if (keyIsDown(76)) {
-      playerTwo.acceleratingFactor = Math.max(
-        playerTwo.acceleratingFactor + 0.0001,
-        0.15
-      );
-      game.movePlayer(
-        playerTwo,
-        Math.max(BASE_SPEED + playerTwo.acceleratingFactor, MAX_SPEED)
-      );
+      if (keyIsDown(74)) {
+        playerTwo.acceleratingFactor = Math.max(
+          playerTwo.acceleratingFactor + 0.0001,
+          0.15
+        );
+        game.movePlayer(
+          playerTwo,
+          Math.min(-BASE_SPEED - playerTwo.acceleratingFactor, -MAX_SPEED)
+        );
+      }
+      if (keyIsDown(76)) {
+        playerTwo.acceleratingFactor = Math.max(
+          playerTwo.acceleratingFactor + 0.0001,
+          0.15
+        );
+        game.movePlayer(
+          playerTwo,
+          Math.max(BASE_SPEED + playerTwo.acceleratingFactor, MAX_SPEED)
+        );
+      }
     }
 
     for (const obstacle of obstacles) {

@@ -16,9 +16,31 @@ class Player {
     this.tackled = false;
     this.newPosition;
     this.translate = 0;
+    this.lap = false;
   }
 
   show() {
+    if (this.lap) {
+      print("LAPPING");
+      if (this.direction > 0) {
+        if (this.position === display.displaySize - 1) {
+          this.direction = -1;
+        }
+      } else {
+        if (this.position === -1) {
+          this.direction = 1;
+        }
+      }
+
+      this.position += this.direction * 0.5;
+      fill(this.playerColor);
+      rect(this.position * pixelSize, 0, pixelSize, pixelSize);
+      stroke(color(0, 0, 0));
+      strokeWeight(1);
+
+      return;
+    }
+
     if (this.tackled) {
       print("tackled");
       // Add a random offset to block position to simulate shaking
