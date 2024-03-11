@@ -35,6 +35,8 @@ let obstacle;
 let obstaclesCount;
 
 let roundTransition = false;
+let shrink = false;
+let isLapping = false;
 
 function generateObstacles(displaySize, playerOne, playerTwo, obstaclesCount) {
   // generate obstacles symmetrically, assumes displaySize is odd
@@ -67,7 +69,27 @@ function setup() {
   game = new Game();
 }
 
+let writeToLap = [];
+
 function draw() {
+  if (isLapping) {
+    playerOne.hasBall = false;
+    playerTwo.hasBall = false;
+    obstacles = [];
+    ball.position = -1;
+
+    if (playerOne.lap) {
+      writeToLap.push(playerOne.position);
+      display.show(writeToLap, playerOne);
+      playerOne.show();
+    } else {
+      writeToLap.push(playerTwo.position);
+      display.show(writeToLap, playerTwo);
+      playerTwo.show();
+    }
+    return;
+  }
+
   if (!roundTransition) {
     controller.update();
     display.show();
@@ -126,34 +148,51 @@ function draw() {
   } else {
     // increase canvas size:
     print("stuck here");
-    if (display.displaySize < newDisplaySize) {
-      display.displaySize += 1;
-      resizeCanvas(display.displaySize * pixelSize, pixelSize);
-      display.show();
+    if (shrink) {
+      print("1");
+      if (display.displaySize > 1) {
+        display.displaySize -= 1;
+        resizeCanvas(display.displaySize * pixelSize, pixelSize);
+        display.show();
+      }
 
-      if (display.displaySize >= newDisplaySize) {
-        ball = new Ball(
-          Math.floor(display.displaySize / 2),
-          color(255, 255, 0)
-        );
-        MAX_SPEED += 0.0025;
-        BASE_SPEED += 0.00025;
-        SPEED_INCREMENT += 0.00025;
-        BLOCKS_LEFT += 1;
-        playerOne.blocksLeft = BLOCKS_LEFT;
-        playerTwo.blocksLeft = BLOCKS_LEFT;
-        obstacles = generateObstacles(
-          display.displaySize,
-          playerOne,
-          playerTwo,
-          obstaclesCount
-        );
-
-        playerOne.hasBall = false;
-        playerTwo.hasBall = false;
-        playerOne.position = 0;
-        playerTwo.position = display.displaySize - 1;
+      if (display.displaySize === 1) {
+        shrink = false;
+      }
+    } else {
+      print("2");
+      if (display.displaySize < newDisplaySize) {
+        display.displaySize += 1;
+        resizeCanvas(display.displaySize * pixelSize, pixelSize);
+        display.show();
+      }
+      if (display.displaySize === newDisplaySize) {
+        shrink = false;
         roundTransition = false;
+        if (display.displaySize >= newDisplaySize) {
+          ball = new Ball(
+            Math.floor(display.displaySize / 2),
+            color(255, 255, 0)
+          );
+          MAX_SPEED += 0.0025;
+          BASE_SPEED += 0.00025;
+          SPEED_INCREMENT += 0.00025;
+          BLOCKS_LEFT += 1;
+          playerOne.blocksLeft = BLOCKS_LEFT;
+          playerTwo.blocksLeft = BLOCKS_LEFT;
+          obstacles = generateObstacles(
+            display.displaySize,
+            playerOne,
+            playerTwo,
+            obstaclesCount
+          );
+
+          playerOne.hasBall = false;
+          playerTwo.hasBall = false;
+          playerOne.position = 0;
+          playerTwo.position = display.displaySize - 1;
+          roundTransition = false;
+        }
       }
     }
   }

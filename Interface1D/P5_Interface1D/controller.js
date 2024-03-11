@@ -14,6 +14,7 @@ class Controller {
     /////////////////////////////////////////////////////////////////
     switch (this.gameState) {
       case "START":
+        isLapping = false;
         controller.pause = false;
         MAX_SPEED = 0.001;
         BASE_SPEED = 0.0001;
@@ -42,6 +43,8 @@ class Controller {
 
         this.gameState = "PLAY";
       case "PLAY":
+        isLapping = false;
+        roundTransition = false;
         controller.pause = false;
         // check for winner
 
@@ -72,10 +75,19 @@ class Controller {
         break;
 
       case "NEW_ROUND":
+        shrink = true;
         controller.pause = true;
-        newDisplaySize = display.displaySize + 15;
+        newDisplaySize = display.displaySize + 7;
         roundTransition = true;
+
         this.gameState = "PLAY";
+
+      // this.gameState = "NEW_ROUND_PAUSE";
+
+      // case "NEW_ROUND_PAUSE":
+      //   setTimeout(() => {
+
+      //   }, 1000);
 
       // Game is over. Show winner and clean everything up so we can start a new game.
       case "SCORE":
@@ -85,17 +97,16 @@ class Controller {
           playerOne.score >= this.maxScore ||
           playerTwo.score >= this.maxScore
         ) {
+          print("here!");
+          isLapping = true;
           this.pause = true;
-          playerOne.hasBall = false;
-          playerTwo.hasBall = false;
-          obstacles = [];
-          ball.position = -1;
 
           if (playerOne.score >= this.maxScore) {
             playerTwo.position = -1;
             playerOne.lap = true;
           } else {
-            plarerOne.position = -1;
+            print("here again");
+            playerOne.position = -1;
             playerTwo.lap = true;
           }
         }

@@ -27,7 +27,7 @@ class Player {
           this.direction = -1;
         }
       } else {
-        if (this.position === -1) {
+        if (this.position === 0) {
           this.direction = 1;
         }
       }
