@@ -1,21 +1,16 @@
 class Ball {
-  constructor() {
-    this.dropped = false;
-    this.droppedPosition = false;
+  constructor(_position, _ballColor) {
+    this.position = _position;
+    this.ballColor = _ballColor;
+    this.isDropped = true;
   }
 
-  setPostiion(_position) {
-    this.droppedPosition = _position;
-  }
-
-  dropBall(pos) {
-    this.dropped = true;
-    this.droppedPosition = pos;
-
-    print("changed droppedPos to ", pos);
-  }
-
-  pickUpBall() {
-    this.dropped = false;
+  show() {
+    if (this.isDropped) {
+      // translate(random(-5, 5), random(-5, 5));
+      strokeWeight(2);
+      fill(this.ballColor);
+      rect(this.position * pixelSize, 0, pixelSize, pixelSize);
+    }
   }
 }

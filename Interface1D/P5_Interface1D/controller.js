@@ -1,10 +1,10 @@
 // This is where your state machines and game logic lives
-
 class Controller {
   // This is the state we start with.
-  constructor(_game) {
-    this.game = _game;
+  constructor() {
     this.gameState = "PLAY";
+    this.maxScore = 3;
+    this.pause;
   }
 
   // This is called from draw() in sketch.js with every frame
@@ -13,39 +13,103 @@ class Controller {
     // This is where your game logic lives
     /////////////////////////////////////////////////////////////////
     switch (this.gameState) {
-      // This is the main game state, where the playing actually happens
-      case "PLAY":
-        // clear screen at frame rate so we always start fresh
-        display.clear();
+      case "START":
+        isLapping = false;
+        controller.pause = false;
+        MAX_SPEED = 0.001;
+        BASE_SPEED = 0.0001;
+        BLOCKS_LEFT = 2;
+        SPEED_INCREMENT = 0.0001;
+        displaySize = 31; // how many pixels are visible in the game
+        display = new Display(displaySize, pixelSize);
+        createCanvas(displaySize * pixelSize, pixelSize);
+        obstaclesCount = 1;
 
-        // show all players in the right place, by adding them to display buffer
-        for (const player of this.game.players) {
-          display.setPixel(player.position, player.playerColor);
+        playerOne = new Player(1, [255, 94, 0], 0);
+        playerTwo = new Player(2, [255, 255, 255], display.displaySize - 1);
+        ball = new Ball(
+          Math.floor(display.displaySize / 2),
+          color(255, 255, 0)
+        );
+        obstacles = generateObstacles(
+          display.displaySize,
+          playerOne,
+          playerTwo,
+          1
+        );
+
+        players = [playerOne, playerTwo];
+        game = new Game();
+
+        this.gameState = "PLAY";
+      case "PLAY":
+        isLapping = false;
+        roundTransition = false;
+        controller.pause = false;
+        // check for winner
+
+        if (
+          playerOne.position === display.displaySize - 1 &&
+          playerOne.hasBall
+        ) {
+          playerOne.score += 1;
+          if (
+            playerOne.score >= this.maxScore ||
+            playerTwo.score >= this.maxScore
+          ) {
+            this.gameState = "SCORE";
+          } else {
+            this.gameState = "NEW_ROUND";
+          }
         }
 
-        // check if player has picked up the ball
-        if (this.game.ball.dropped) {
-          for (const player of this.game.players) {
-            if (player.position === this.game.ball.droppedPosition) {
-              player.receiveItem();
-              this.game.ball.dropped = false;
-              print("player picked up ball!");
-            }
+        if (playerTwo.position === 0 && playerTwo.hasBall) {
+          playerTwo.score += 1;
+          if (playerOne.maxScore >= 3 || playerTwo.maxScore >= 3) {
+            this.gameState = "SCORE";
+          } else {
+            this.gameState = "NEW_ROUND";
           }
         }
 
         break;
 
+      case "NEW_ROUND":
+        shrink = true;
+        controller.pause = true;
+        newDisplaySize = display.displaySize + 7;
+        roundTransition = true;
+
+        this.gameState = "PLAY";
+
+      // this.gameState = "NEW_ROUND_PAUSE";
+
+      // case "NEW_ROUND_PAUSE":
+      //   setTimeout(() => {
+
+      //   }, 1000);
+
       // Game is over. Show winner and clean everything up so we can start a new game.
       case "SCORE":
-        // reset
+        // clear everything
 
-        // reset shadow zones
+        if (
+          playerOne.score >= this.maxScore ||
+          playerTwo.score >= this.maxScore
+        ) {
+          print("here!");
+          isLapping = true;
+          this.pause = true;
 
-        //light up w/ winner color by populating all pixels in buffer with their color
-        display.setAllPixels(200, 34, 79);
-
-        break;
+          if (playerOne.score >= this.maxScore) {
+            playerTwo.position = -1;
+            playerOne.lap = true;
+          } else {
+            print("here again");
+            playerOne.position = -1;
+            playerTwo.lap = true;
+          }
+        }
 
       // Not used, it's here just for code compliance
       default:
@@ -54,69 +118,57 @@ class Controller {
   }
 }
 
-// This function gets called when a key on the keyboard is pressed
+function keyReleased() {
+  if (controller.pause) {
+    return;
+  }
+  if (key === "D" || key === "d" || key === "a" || key === "A") {
+    playerOne.acceleratingFactor = 0;
+  }
+  if (key === "J" || key === "j" || key === "L" || key === "l") {
+    playerTwo.acceleratingFactor = 0;
+  }
+  return false; // prevent any default behavior
+}
+
 function keyPressed() {
-  // A D to move left and right
-  // S to give
+  if (controller.pause) {
+    return;
+  }
+
   if (key == "A" || key == "a") {
-    game.move(playerOne, 0);
+    game.movePlayer(playerOne, -1);
   }
 
+  // And so on...
   if (key == "D" || key == "d") {
-    game.move(playerOne, 1);
+    game.movePlayer(playerOne, 1);
   }
 
-  if (key == "S" || key == "s") {
-    game.giveItem(playerOne);
-  }
-
-  // J L to move left and right
-  // K to give
-  // U to act
   if (key == "J" || key == "j") {
-    game.move(playerTwo, 0);
+    game.movePlayer(playerTwo, -1);
   }
 
   if (key == "L" || key == "l") {
-    game.move(playerTwo, 1);
+    game.movePlayer(playerTwo, 1);
+  }
+
+  if (key == "S" || key == "s") {
+    game.tackle(playerOne);
+  }
+
+  if (key == "W" || key == "w") {
+    game.placeObstacle(playerOne);
   }
 
   if (key == "K" || key == "k") {
-    game.giveItem(playerTwo);
+    game.tackle(playerTwo);
   }
 
-  // F H to move left and right
-  // G to give
-  // T to act
-  if (key == "F" || key == "f") {
-    game.move(playerThree, 0);
+  if (key == "I" || key == "i") {
+    game.placeObstacle(playerTwo);
   }
-
-  if (key == "H" || key == "h") {
-    game.move(playerThree, 1);
-  }
-
-  if (key == "G" || key == "g") {
-    game.giveItem(playerThree);
-  }
-
-  // F H to move left and right
-  // G to give
-  // T to act
-  if (key == "Z" || key == "z") {
-    game.move(playerFour, 0);
-  }
-
-  if (key == "C" || key == "c") {
-    game.move(playerFour, 1);
-  }
-
-  if (key == "X" || key == "x") {
-    game.giveItem(playerFour);
-  }
-
-  // When you press the letter R, the game resets back to the play state
   if (key == "R" || key == "r") {
-    controller.gameState = "PLAY";
+    controller.gameState = "START";
   }
 }

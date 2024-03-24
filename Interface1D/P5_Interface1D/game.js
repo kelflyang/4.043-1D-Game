@@ -1,143 +1,244 @@
 // game state keeps track of
-
+let PUSH_RANGE = 3;
 class Game {
-  constructor(_players, _displaySize, _ball) {
-    this.displaySize = _displaySize;
-    this.players = _players;
-    this.range = 3;
-    this.ball = _ball;
-  }
+  constructor() {}
 
-  // Move player based on keyboard input
-  move(player, _direction) {
-    let newPosition = player.position;
-
-    // check if player direction is same as moving direction
-    if (player.direction === _direction) {
-      if (_direction === 0) {
-        newPosition -= 1;
-      } else {
-        newPosition += 1;
-      }
-      // if player hits the edge of display, loop around
-      if (newPosition == -1) {
-        player.position = this.displaySize - 1;
-      } else if (newPosition == this.displaySize) {
-        player.position = 0;
-      } else {
-        player.position = newPosition;
-      }
-    } else {
-      player.direction = _direction;
-    }
-  }
-
-  findFurthestRight(players) {
-    let furthestRightPlayer = players[0];
-    let furthestRightPosition = players[0].position;
-
-    for (const player of players) {
-      if (player.position > furthestRightPosition) {
-        furthestRightPosition = player.position;
-        furthestRightPlayer = player;
-      }
-    }
-
-    console.log(furthestRightPlayer);
-    return furthestRightPlayer;
-  }
-
-  findFurthestLeft(players) {
-    let furthestLeftPlayer = players[0];
-    let furthestLeftPosition = players[0].position;
-
-    for (const player of players) {
-      if (player.position < furthestLeftPosition) {
-        furthestLeftPosition = player.position;
-        furthestLeftPlayer = player;
-      }
-    }
-
-    console.log(furthestLeftPlayer);
-    return furthestLeftPlayer;
-  }
-
-  isInRange(value, min, max) {
-    return value >= min && value <= max;
-  }
-
-  findNearbyPlayer(current) {
-    let nearbyPlayers = [];
-    for (const player of this.players) {
+  isTouchingObstacle(player, newPosition) {
+    for (const obstacle of obstacles) {
       if (
-        player.id !== current.id &&
-        player.direction !== current.direction &&
-        ((current.direction === 1 &&
-          this.isInRange(
-            player.position,
-            current.position,
-            current.position + this.range
-          )) ||
-          (current.direction === 0 &&
-            this.isInRange(
-              player.position,
-              current.position - this.range,
-              current.position
-            )))
+        obstacle.player.playerId === player.playerId ||
+        obstacle.durability < 1
       ) {
-        nearbyPlayers.push(player);
+        continue;
       }
-    }
 
-    // return player closes to current player
-    if (nearbyPlayers.length > 0) {
-      if (current.direction == 0) {
-        return this.findFurthestRight(nearbyPlayers);
-      } else {
-        return this.findFurthestLeft(nearbyPlayers);
+      if (this.isInteracting(newPosition, obstacle.position)) {
+        print("detected obstacle");
+        return obstacle;
       }
     }
     return false;
   }
 
-  getThrownPosition(position, direction) {
-    let newPosition;
-    if (direction === 1) {
-      newPosition = position += this.range;
+  isTouchingBall(player) {
+    if (!ball.isDropped) {
+      return false;
+    }
+    if (this.isInteracting(player.position, ball.position)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  pickUpBall(player) {
+    player.hasBall = true;
+    ball.isDropped = false;
+  }
+
+  dropBall(player, newPos) {
+    player.hasBall = false;
+    ball.isDropped = true;
+
+    if (newPos) {
+      ball.position = newPos;
+      return;
+    }
+
+    if (player.direction > 0) {
+      ball.position = player.position + 1;
     } else {
-      newPosition = position -= this.range;
+      ball.position = player.position - 1;
     }
+  }
 
-    if (newPosition >= this.displaySize) {
-      print("new thrown position");
-      return abs(this.displaySize - newPosition);
+  calibrateNewPosition(player, direction, newPosition) {
+    let maxPos = Math.max(player.position, newPosition);
+    let minPos = Math.min(player.position, newPosition);
+    let minDiff;
+    if (direction < 0) {
+      newPosition = Math.max(newPosition, 0);
     }
-
-    if (newPosition < 0) {
-      return this.displaySize + newPosition;
+    if (direction > 0) {
+      newPosition = Math.min(newPosition, display.displaySize - 1);
     }
-
+    for (const obstacle of obstacles) {
+      if (
+        obstacle.player.playerId === player.playerId ||
+        obstacle.durability < 1
+      ) {
+        continue;
+      }
+      if (
+        obstacle.position > minPos &&
+        obstacle.position < maxPos &&
+        (minDiff === undefined ||
+          Math.abs(obstacle.position - player.position) < minDiff)
+      ) {
+        if (newPosition < obstacle.position) {
+          newPosition = obstacle.position + 1;
+        } else {
+          newPosition = obstacle.position - 1;
+        }
+        minDiff = Math.abs(obstacle.position - player.position);
+      }
+    }
     return newPosition;
   }
 
-  giveItem(giver) {
-    if (giver.hasItem) {
-      let player = this.findNearbyPlayer(giver);
-      if (player) {
-        giver.removeItem();
-        player.receiveItem();
+  movePlayer(player, direction) {
+    let newPosition;
+    player.direction = direction;
+    if (direction < 0) {
+      newPosition = Math.max(player.position + direction, 0);
+    }
+    if (direction > 0) {
+      newPosition = Math.min(
+        player.position + direction,
+        display.displaySize - 1
+      );
+    }
+    let obstacle = this.isTouchingObstacle(player, newPosition);
+    if (obstacle) {
+      if (direction > 0) {
+        newPosition = obstacle.position - 1;
+        print("pushing right");
       } else {
-        // drop the ball
-        giver.removeItem();
-        if (giver.direction === 0) {
-          this.ball.dropBall(this.getThrownPosition(giver.position, 0));
-        } else {
-          this.ball.dropBall(this.getThrownPosition(giver.position, 1));
+        newPosition = obstacle.position + 1;
+        print("pushing left");
+      }
+    }
+    player.position = newPosition;
+    if (this.isTouchingBall(player, newPosition)) {
+      this.pickUpBall(player);
+    }
+  }
+
+  notInterruptedByObstacles(player, otherPlayer) {
+    let minPos = Math.min(player, otherPlayer);
+    let maxPos = Math.max(player, otherPlayer);
+    for (const obstacle of obstacles) {
+      if (
+        obstacle.position <= maxPos &&
+        obstacle.position >= minPos &&
+        obstacle.durability > 0
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  tackle(player) {
+    // TRY TACKLING OBSTACLES
+    for (const obstacle of obstacles) {
+      if (
+        this.isInteracting(player.position, obstacle.position) &&
+        obstacle.player !== player &&
+        obstacle.durability > 0
+      ) {
+        obstacle.hit = true;
+        obstacle.originalPosition = obstacle.position;
+        obstacle.durability -= 1;
+        return;
+      }
+    }
+
+    // TRY TACKLING OTHER PLAYER
+    let otherPlayer = players.filter((p) => p !== player)[0];
+    if (
+      this.isInteracting(player.position, otherPlayer.position, 3) &&
+      this.notInterruptedByObstacles(player.position, otherPlayer.position)
+    ) {
+      console.log("Tackling other player!");
+      otherPlayer.tackledTimes += 1;
+      let pushDirection = otherPlayer.position > player.position ? 1 : -1;
+      console.log("push direction ", pushDirection);
+      if (otherPlayer.tackledTimes === 1) {
+        let otherNewPosition = game.calibrateNewPosition(
+          otherPlayer,
+          pushDirection,
+          pushDirection * PUSH_RANGE + otherPlayer.position
+        );
+        let newPosition = game.calibrateNewPosition(
+          player,
+          -pushDirection,
+          -pushDirection * PUSH_RANGE + player.position
+        );
+
+        otherPlayer.newPosition = otherNewPosition;
+        otherPlayer.tackled = true;
+        player.tackled = true;
+        player.newPosition = newPosition;
+
+        // push _player back
+        // game.movePlayer(otherPlayer, pushDirection * PUSH_RANGE);
+      } else {
+        // game.movePlayer(otherPlayer, pushDirection * PUSH_RANGE);
+        let otherNewPosition = game.calibrateNewPosition(
+          otherPlayer,
+          pushDirection,
+          pushDirection * PUSH_RANGE + otherPlayer.position
+        );
+
+        let newPosition = game.calibrateNewPosition(
+          player,
+          -pushDirection,
+          -pushDirection * PUSH_RANGE + player.position
+        );
+        otherPlayer.tackled = true;
+        otherPlayer.newPosition = otherNewPosition;
+
+        player.tackled = true;
+        player.newPosition = newPosition;
+        if (otherPlayer.hasBall) {
+          let newBallPos =
+            pushDirection > 1
+              ? player.position + (otherPlayer.position - player.position) / 2
+              : otherPlayer.position +
+                (player.position - otherPlayer.position) / 2;
+          setTimeout(() => {
+            game.dropBall(otherPlayer, newBallPos);
+          }, 100);
         }
+
+        otherPlayer.tackledTimes = 0;
+        // push _player back and drop ball in between
+      }
+    }
+  }
+
+  placeObstacle(player) {
+    if (player.blocksLeft === 0) {
+      return;
+    }
+    let otherPlayer = players.filter((p) => p !== player)[0];
+    if (player.direction > 0) {
+      if (
+        player.position + 1 < display.displaySize &&
+        !this.isInteracting(player.position + 1, otherPlayer.position)
+      ) {
+        obstacles.push(new Obstacle(player.position + 1, player));
+        player.blocksLeft -= 1;
       }
     } else {
-      console.log(`${giver.id} does not have an item`);
+      if (
+        player.position - 1 > 0 &&
+        !this.isInteracting(player.position - 1, otherPlayer.position)
+      )
+        obstacles.push(new Obstacle(player.position - 1, player));
+      player.blocksLeft -= 1;
     }
-    print("PLAYERS ", this.players);
+  }
+
+  isInteracting(position1, position2, radius = 0) {
+    if (
+      (position1 <= position2 && position1 >= position2 - (1 + radius)) ||
+      (position1 >= position2 && position1 <= position2 + (1 + radius))
+    ) {
+      print("is interacting");
+      return true;
+    }
+    return false;
   }
 }

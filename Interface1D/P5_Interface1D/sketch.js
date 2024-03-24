@@ -5,8 +5,16 @@
   Marcelo Coelho
 
 */ /////////////////////////////////////
-let displaySize = 30; // how many pixels are visible in the game
-let pixelSize = 20; // how big each 'pixel' looks on screen
+let BALL_COLOR = [0, 0, 0];
+let MAX_SPEED = 0.001;
+let BASE_SPEED = 0.0001;
+let BLOCKS_LEFT = 2;
+let SPEED_INCREMENT = 0.0001;
+let TOTAL_DISPLAY = 61;
+let displaySize = 31; // how many pixels are visible in the game
+let newDisplaySize = 31;
+
+let pixelSize = 30; // how big each 'pixel' looks on screen
 
 let game;
 
@@ -22,96 +30,169 @@ let collisionAnimation; // Where we store and manage the collision animation
 
 let score; // Where we keep track of score and winner
 
-function drawPlayer(set) {
-  // Convert set to array
-  const array = Array.from(set);
-  // Pick a random index
-  const randomIndex = Math.floor(Math.random() * array.length);
-  // Get the element at the random index
-  const randomElement = array[randomIndex];
-  // Remove the element from the set
-  set.delete(randomElement);
-  // Return the randomly drawn element
-  return randomElement;
-}
+let obstacle;
 
-function getTeam(playerId, teams) {
-  for (i = 0; i < teams.length; i++) {
-    if (playerId in teams[i]) {
-      return i;
-    }
+let obstaclesCount;
+
+let roundTransition = false;
+let shrink = false;
+let isLapping = false;
+
+function generateObstacles(displaySize, playerOne, playerTwo, obstaclesCount) {
+  // generate obstacles symmetrically, assumes displaySize is odd
+  let maxOffset = Math.round(displaySize / 2) - 2;
+  let minOffset = 1;
+  let obstacles = [];
+
+  for (let i = 0; i < obstaclesCount; i++) {
+    let offSet = Math.random() * (maxOffset - minOffset) + minOffset;
+    obstacles.push(new Obstacle(offSet, playerTwo));
+    obstacles.push(new Obstacle(displaySize - offSet - 1, playerOne));
+    // minOffset = offSet;
   }
-}
-
-function generateOrientation() {
-  // Generate a random decimal between 0 and 1
-  const randomDecimal = Math.random();
-  // Convert the random decimal to either 0 or 1
-  const randomBinary = Math.round(randomDecimal);
-  return randomBinary;
+  return obstacles;
 }
 
 function setup() {
-  createCanvas(displaySize * pixelSize, pixelSize); // dynamically sets canvas size
+  createCanvas(displaySize * pixelSize, pixelSize);
 
-  ball = new Ball();
-  display = new Display(displaySize, pixelSize); //Initializing the display
+  display = new Display(displaySize, pixelSize);
+  obstaclesCount = 1;
 
-  // initialize pairs of team
-  playerIds = new Set([1, 2, 3, 4]);
-  team1 = [drawPlayer(playerIds), drawPlayer(playerIds)];
-  team2 = Array.from(playerIds);
-  teams = [team1, team2];
-
-  // initialize player
-  playerOne = new Player(
-    1,
-    color(255, 0, 0),
-    parseInt(random(0, displaySize, getTeam(1, teams))),
-    generateOrientation()
-  );
-  playerTwo = new Player(
-    2,
-    color(0, 0, 255),
-    parseInt(random(0, displaySize, getTeam(2, teams))),
-    generateOrientation()
-  );
-  // playerThree = new Player(
-  //   3,
-  //   color(0, 255, 255),
-  //   parseInt(random(0, displaySize)),
-  //   getTeam(3, teams),
-  //   generateOrientation()
-  // );
-  // playerFour = new Player(
-  //   4,
-  //   color(0, 255, 0),
-  //   parseInt(random(0, displaySize)),
-  //   getTeam(4, teams),
-  //   generateOrientation()
-  // );
+  controller = new Controller();
+  playerOne = new Player(1, [255, 94, 0], 0);
+  playerTwo = new Player(2, [27, 172, 41], displaySize - 1);
+  ball = new Ball(Math.floor(displaySize / 2), color(BALL_COLOR));
+  obstacles = generateObstacles(displaySize, playerOne, playerTwo, 1);
 
   players = [playerOne, playerTwo];
-
-  display.setPlayers(players);
-
-  print(players);
-
-  // initialize items
-  playwerWithItem = players[Math.floor(Math.random() * 1)];
-  playwerWithItem.receiveItem();
-
-  game = new Game(players, displaySize, ball);
-  controller = new Controller(game); // Initializing controller
+  game = new Game();
 }
 
+let writeToLap = [];
+
 function draw() {
-  // start with a blank screen
-  background(0, 0, 0);
+  if (isLapping) {
+    playerOne.hasBall = false;
+    playerTwo.hasBall = false;
+    obstacles = [];
+    ball.position = -1;
 
-  // Runs state machine at determined framerate
-  controller.update();
+    if (playerOne.lap) {
+      writeToLap.push(playerOne.position);
+      display.show(writeToLap, playerOne);
+      playerOne.show();
+    } else {
+      writeToLap.push(playerTwo.position);
+      display.show(writeToLap, playerTwo);
+      playerTwo.show();
+    }
+    return;
+  }
 
-  // After we've updated our states, we show the current one
-  display.show();
+  if (!roundTransition) {
+    controller.update();
+    display.show();
+
+    if (!controller.pause) {
+      // if (keyIsDown(65)) {
+      //   playerOne.acceleratingFactor = Math.max(
+      //     playerOne.acceleratingFactor + 0.0001,
+      //     0.15
+      //   );
+      //   game.movePlayer(
+      //     playerOne,
+      //     Math.min(-BASE_SPEED - playerOne.acceleratingFactor, -MAX_SPEED)
+      //   );
+      // }
+      // if (keyIsDown(68)) {
+      //   playerOne.acceleratingFactor = Math.max(
+      //     playerOne.acceleratingFactor + 0.0001,
+      //     0.15
+      //   );
+      //   game.movePlayer(
+      //     playerOne,
+      //     Math.max(BASE_SPEED + playerOne.acceleratingFactor, MAX_SPEED)
+      //   );
+      // }
+      // if (keyIsDown(74)) {
+      //   playerTwo.acceleratingFactor = Math.max(
+      //     playerTwo.acceleratingFactor + 0.0001,
+      //     0.15
+      //   );
+      //   game.movePlayer(
+      //     playerTwo,
+      //     Math.min(-BASE_SPEED - playerTwo.acceleratingFactor, -MAX_SPEED)
+      //   );
+      // }
+      // if (keyIsDown(76)) {
+      //   playerTwo.acceleratingFactor = Math.max(
+      //     playerTwo.acceleratingFactor + 0.0001,
+      //     0.15
+      //   );
+      //   game.movePlayer(
+      //     playerTwo,
+      //     Math.max(BASE_SPEED + playerTwo.acceleratingFactor, MAX_SPEED)
+      //   );
+      // }
+    }
+
+    for (const obstacle of obstacles) {
+      obstacle.show();
+    }
+
+    playerOne.show();
+    playerTwo.show();
+    ball.show();
+  } else {
+    // increase canvas size:
+    print("stuck here");
+    if (shrink) {
+      print("1");
+      if (display.displaySize > 0) {
+        display.displaySize -= 1;
+        resizeCanvas(display.displaySize * pixelSize, pixelSize);
+        display.show();
+      }
+
+      if (display.displaySize === 1) {
+        shrink = false;
+      }
+    } else {
+      print("2");
+      if (display.displaySize < newDisplaySize) {
+        display.displaySize += 1;
+        resizeCanvas(display.displaySize * pixelSize, pixelSize);
+        display.show();
+      }
+      if (display.displaySize === newDisplaySize) {
+        shrink = false;
+        roundTransition = false;
+        if (display.displaySize >= newDisplaySize) {
+          ball = new Ball(
+            Math.floor(display.displaySize / 2),
+            color(BALL_COLOR)
+          );
+          MAX_SPEED += 0.0025;
+          BASE_SPEED += 0.00025;
+          SPEED_INCREMENT += 0.00025;
+          BLOCKS_LEFT += 1;
+          playerOne.blocksLeft = BLOCKS_LEFT;
+          playerTwo.blocksLeft = BLOCKS_LEFT;
+          obstacles = generateObstacles(
+            display.displaySize,
+            playerOne,
+            playerTwo,
+            obstaclesCount
+          );
+
+          playerOne.hasBall = false;
+          playerTwo.hasBall = false;
+          playerOne.position = 0;
+          playerTwo.position = display.displaySize - 1;
+          roundTransition = false;
+        }
+      }
+    }
+  }
 }
