@@ -5,7 +5,7 @@
   Marcelo Coelho
 
 */ /////////////////////////////////////
-let BALL_COLOR = [255, 255, 0];
+let BALL_COLOR = [0, 0, 0];
 let MAX_SPEED = 0.001;
 let BASE_SPEED = 0.0001;
 let BLOCKS_LEFT = 2;
@@ -14,7 +14,7 @@ let TOTAL_DISPLAY = 61;
 let displaySize = 31; // how many pixels are visible in the game
 let newDisplaySize = 31;
 
-let pixelSize = 20; // how big each 'pixel' looks on screen
+let pixelSize = 30; // how big each 'pixel' looks on screen
 
 let game;
 
@@ -61,7 +61,7 @@ function setup() {
 
   controller = new Controller();
   playerOne = new Player(1, [255, 94, 0], 0);
-  playerTwo = new Player(2, [255, 255, 255], displaySize - 1);
+  playerTwo = new Player(2, [27, 172, 41], displaySize - 1);
   ball = new Ball(Math.floor(displaySize / 2), color(BALL_COLOR));
   obstacles = generateObstacles(displaySize, playerOne, playerTwo, 1);
 
@@ -95,47 +95,46 @@ function draw() {
     display.show();
 
     if (!controller.pause) {
-      if (keyIsDown(65)) {
-        playerOne.acceleratingFactor = Math.max(
-          playerOne.acceleratingFactor + 0.0001,
-          0.15
-        );
-        game.movePlayer(
-          playerOne,
-          Math.min(-BASE_SPEED - playerOne.acceleratingFactor, -MAX_SPEED)
-        );
-      }
-      if (keyIsDown(68)) {
-        playerOne.acceleratingFactor = Math.max(
-          playerOne.acceleratingFactor + 0.0001,
-          0.15
-        );
-        game.movePlayer(
-          playerOne,
-          Math.max(BASE_SPEED + playerOne.acceleratingFactor, MAX_SPEED)
-        );
-      }
-
-      if (keyIsDown(74)) {
-        playerTwo.acceleratingFactor = Math.max(
-          playerTwo.acceleratingFactor + 0.0001,
-          0.15
-        );
-        game.movePlayer(
-          playerTwo,
-          Math.min(-BASE_SPEED - playerTwo.acceleratingFactor, -MAX_SPEED)
-        );
-      }
-      if (keyIsDown(76)) {
-        playerTwo.acceleratingFactor = Math.max(
-          playerTwo.acceleratingFactor + 0.0001,
-          0.15
-        );
-        game.movePlayer(
-          playerTwo,
-          Math.max(BASE_SPEED + playerTwo.acceleratingFactor, MAX_SPEED)
-        );
-      }
+      // if (keyIsDown(65)) {
+      //   playerOne.acceleratingFactor = Math.max(
+      //     playerOne.acceleratingFactor + 0.0001,
+      //     0.15
+      //   );
+      //   game.movePlayer(
+      //     playerOne,
+      //     Math.min(-BASE_SPEED - playerOne.acceleratingFactor, -MAX_SPEED)
+      //   );
+      // }
+      // if (keyIsDown(68)) {
+      //   playerOne.acceleratingFactor = Math.max(
+      //     playerOne.acceleratingFactor + 0.0001,
+      //     0.15
+      //   );
+      //   game.movePlayer(
+      //     playerOne,
+      //     Math.max(BASE_SPEED + playerOne.acceleratingFactor, MAX_SPEED)
+      //   );
+      // }
+      // if (keyIsDown(74)) {
+      //   playerTwo.acceleratingFactor = Math.max(
+      //     playerTwo.acceleratingFactor + 0.0001,
+      //     0.15
+      //   );
+      //   game.movePlayer(
+      //     playerTwo,
+      //     Math.min(-BASE_SPEED - playerTwo.acceleratingFactor, -MAX_SPEED)
+      //   );
+      // }
+      // if (keyIsDown(76)) {
+      //   playerTwo.acceleratingFactor = Math.max(
+      //     playerTwo.acceleratingFactor + 0.0001,
+      //     0.15
+      //   );
+      //   game.movePlayer(
+      //     playerTwo,
+      //     Math.max(BASE_SPEED + playerTwo.acceleratingFactor, MAX_SPEED)
+      //   );
+      // }
     }
 
     for (const obstacle of obstacles) {
@@ -150,7 +149,7 @@ function draw() {
     print("stuck here");
     if (shrink) {
       print("1");
-      if (display.displaySize > 1) {
+      if (display.displaySize > 0) {
         display.displaySize -= 1;
         resizeCanvas(display.displaySize * pixelSize, pixelSize);
         display.show();
@@ -172,7 +171,7 @@ function draw() {
         if (display.displaySize >= newDisplaySize) {
           ball = new Ball(
             Math.floor(display.displaySize / 2),
-            color(255, 255, 0)
+            color(BALL_COLOR)
           );
           MAX_SPEED += 0.0025;
           BASE_SPEED += 0.00025;

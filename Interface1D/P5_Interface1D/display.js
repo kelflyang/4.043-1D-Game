@@ -6,7 +6,7 @@ class Display {
   constructor(_displaySize, _pixelSize) {
     this.displaySize = _displaySize;
     this.pixelSize = _pixelSize;
-    this.displayColor = color(97, 75, 62);
+    this.displayColor = color(255, 255, 255);
   }
 
   show(writeToLap = [], player = undefined) {

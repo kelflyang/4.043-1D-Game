@@ -79,7 +79,7 @@ class Player {
     }
 
     if (this.hasBall) {
-      stroke(color([255, 255, 0]));
+      stroke(color(BALL_COLOR));
       strokeWeight(5);
     }
     fill(this.playerColor);
